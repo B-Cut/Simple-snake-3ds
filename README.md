@@ -1,3 +1,3 @@
-# template
+# Snake 3ds
 
-This is a template for starting new 3DS libctru projects.
+This is a personal project for educational porpuses

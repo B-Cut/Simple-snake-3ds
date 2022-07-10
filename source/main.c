@@ -1,3 +1,6 @@
+//TODO: Separate different functions in different files
+//TODO: Implement a states system
+
 #include <citro2d.h>
 #include <3ds.h>
 
