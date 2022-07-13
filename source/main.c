@@ -15,8 +15,8 @@
 #define TILE_WIDTH 10
 #define TILE_HEIGHT 10
 
-const u8 GRID_WIDTH = SCREEN_WIDTH/TILE_WIDTH;
-const u8 GRID_HEIGHT = SCREEN_HEIGHT/TILE_HEIGHT;
+#define GRID_WIDTH 40
+#define GRID_HEIGHT 24
 
 typedef enum directions{RIGHT, DOWN, LEFT, UP} Directions;
 typedef enum tiletype{EMPTY, SNAKE, FOOD} TileType;
@@ -37,7 +37,7 @@ typedef struct snake_tile{
 SnakeTile* createHead(u8 initialX, u8 initialY, TileType** grid);
 void createSnakeTile(SnakeTile* head, TileType** grid);
 void updateSnakeMoveDir(SnakeTile* head, Directions direction);
-void moveSnake(SnakeTile* head, TileType** grid);
+void moveSnake(SnakeTile* head, TileType** grid, bool* gameOver);
 void deallocSnake(SnakeTile* head);
 
 //Playfield code
@@ -47,6 +47,7 @@ void deallocGrid(TileType** grid, u8 width, u8 height);
 //Food code
 void spawnFood(TileType** grid);
 
+void doNothing(){}
 
 //---------------------------------------------------------------------------------
 int main(int argc, char* argv[]) {
@@ -93,13 +94,17 @@ int main(int argc, char* argv[]) {
 		printf("\x1b[3;1HGPU:     %6.2f%%\x1b[K", C3D_GetDrawingTime()*6.0f);
 		printf("\x1b[4;1HCmdBuf:  %6.2f%%\x1b[K", C3D_GetCmdBufUsage()*100.0f);
 
-		if(kDown & KEY_DRIGHT) currentMoveDirection = RIGHT;
-		else if(kDown & KEY_DDOWN) currentMoveDirection = DOWN;
-		else if(kDown & KEY_DLEFT) currentMoveDirection = LEFT;
-		else if(kDown & KEY_DUP) currentMoveDirection = UP;
+		
+		
+			if(kDown & KEY_DRIGHT) currentMoveDirection = RIGHT;
+			else if(kDown & KEY_DDOWN) currentMoveDirection = DOWN;
+			else if(kDown & KEY_DLEFT) currentMoveDirection = LEFT;
+			else if(kDown & KEY_DUP) currentMoveDirection = UP;
 
-		updateSnakeMoveDir(head, currentMoveDirection);
-		moveSnake(head, grid);
+			updateSnakeMoveDir(head, currentMoveDirection);
+			moveSnake(head, grid, &gameOver);
+		
+		
 
 		// Render the scene
 		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
@@ -193,7 +198,7 @@ void updateSnakeMoveDir(SnakeTile* head, Directions direction){
 	}
 	head->direction = direction;
 }
-void moveSnake(SnakeTile* head, TileType** grid){
+void moveSnake(SnakeTile* head, TileType** grid, bool* gameOver){
 	Coord previousPos = {head->pos.x, head->pos.y};
 	switch (head->direction){
 		case RIGHT:
@@ -212,16 +217,24 @@ void moveSnake(SnakeTile* head, TileType** grid){
 			break;
 	}
 
-	
+	if(grid[head->pos.x][head->pos.y] == SNAKE ||(head->pos.y >= GRID_HEIGHT || head->pos.y < 0) || (head->pos.x >= GRID_HEIGHT || head->pos.x < 0)){
+		head->pos.x = previousPos.x;
+		head->pos.y = previousPos.y;
+		*gameOver = 1;
+		return;
+	}
+
+	//Tile has food
+	if(grid[head->pos.x][head->pos.y] == FOOD){
+		createSnakeTile(head, grid);
+	}
+
 	grid[head->pos.x][head->pos.y] = SNAKE;
 
-	if(head->next == NULL){
-		grid[previousPos.x][previousPos.y] = EMPTY;
-	} else{
-		moveSnake(head->next, grid);
-	}
-	
+	grid[previousPos.x][previousPos.y] = EMPTY;
+	if(head->next != NULL) moveSnake(head->next, grid, gameOver);
 }
+
 
 void deallocSnake(SnakeTile *head){
 	if(head->next != NULL){
@@ -245,14 +258,14 @@ void deallocGrid(TileType** grid, u8 width, u8 height){
 }
 
 void spawnFood(TileType** grid){
-	while (1){//Repeat till it works
-		srand(osGetTime());
-		u8 posX = rand() % GRID_WIDTH;
-		u8 posY = rand() % GRID_HEIGHT;
+	srand(osGetTime());
+	u8 posX = rand() % GRID_WIDTH;
+	u8 posY = rand() % GRID_HEIGHT;
 
-		if(grid[posX][posY] == EMPTY){
-			grid[posX][posY] = FOOD;
-		}
+	if(grid[posX][posY] == EMPTY){
+		grid[posX][posY] = FOOD;
+		return;
 	}
+	else spawnFood(grid);
 	
 }
