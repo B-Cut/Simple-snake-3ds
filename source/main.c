@@ -8,37 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "snake.h"
+#include "util.h"
 
-#define SCREEN_WIDTH  400
-#define SCREEN_HEIGHT 240
-
-#define TILE_WIDTH 10
-#define TILE_HEIGHT 10
-
-#define GRID_WIDTH 40
-#define GRID_HEIGHT 24
-
-typedef enum directions{RIGHT, DOWN, LEFT, UP} Directions;
-typedef enum tiletype{EMPTY, SNAKE, FOOD} TileType;
-
-typedef struct coord{
-	u8 x;
-	u8 y;
-} Coord;
-
-typedef struct snake_tile{
-	Coord pos;
-	Directions direction;
-	struct snake_tile *next;
-} SnakeTile;
-
-
-//Snake Code
-SnakeTile* createHead(u8 initialX, u8 initialY, TileType** grid);
-void createSnakeTile(SnakeTile* head, TileType** grid);
-void updateSnakeMoveDir(SnakeTile* head, Directions direction);
-void moveSnake(SnakeTile* head, TileType** grid, bool* gameOver);
-void deallocSnake(SnakeTile* head);
 
 //Playfield code
 TileType** initGrid(u8 width, u8 height);
@@ -96,13 +68,13 @@ int main(int argc, char* argv[]) {
 
 		
 		
-			if(kDown & KEY_DRIGHT) currentMoveDirection = RIGHT;
-			else if(kDown & KEY_DDOWN) currentMoveDirection = DOWN;
-			else if(kDown & KEY_DLEFT) currentMoveDirection = LEFT;
-			else if(kDown & KEY_DUP) currentMoveDirection = UP;
+		if(kDown & KEY_DRIGHT) currentMoveDirection = RIGHT;
+		else if(kDown & KEY_DDOWN) currentMoveDirection = DOWN;
+		else if(kDown & KEY_DLEFT) currentMoveDirection = LEFT;
+		else if(kDown & KEY_DUP) currentMoveDirection = UP;
 
-			updateSnakeMoveDir(head, currentMoveDirection);
-			moveSnake(head, grid, &gameOver);
+		updateSnakeMoveDir(head, currentMoveDirection);
+		moveSnake(head, grid, &gameOver);
 		
 		
 
@@ -147,101 +119,6 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
-void createSnakeTile(SnakeTile* head, TileType** grid){
-	if(head->next != NULL){
-		createSnakeTile(head->next, grid);//Creates the new tile as the last item
-		return;
-	}
-	SnakeTile* tile = (SnakeTile*) malloc(sizeof(SnakeTile));
-	tile->direction = head->direction;
-	tile->next = NULL;
-	//The tile should be positioned "opposite" to the direction of previous tile
-	switch (head->direction){
-	case UP:
-		tile->pos.x = head->pos.x;
-		tile->pos.y = head->pos.y + 1;
-		break;
-	case RIGHT:
-		tile->pos.x = head->pos.x - 1;
-		tile->pos.y = head->pos.y;
-	case DOWN:
-		tile->pos.x = head->pos.x;
-		tile->pos.y = head->pos.y -1;
-	case LEFT:
-		tile->pos.x = head->pos.x + 1;
-		tile->pos.y = head->pos.y;
-	default:
-		break;
-	}
-	
-	head->next = tile;
-	grid[tile->pos.x][tile->pos.y] = SNAKE;
-}
-
-SnakeTile* createHead(u8 initialX, u8 initialY, TileType** grid){
-	SnakeTile *head = (SnakeTile*) malloc(sizeof(SnakeTile));
-
-	head->direction = RIGHT;
-	head->next = NULL;
-	
-	head->pos.x = initialX;
-	head->pos.y = initialY;
-
-	grid[head->pos.x][head->pos.y] = SNAKE;
-
-	return head;
-}
-
-void updateSnakeMoveDir(SnakeTile* head, Directions direction){
-	if(head->next != NULL){
-		updateSnakeMoveDir(head->next, head->direction);//The next tile moves as the previous tile
-	}
-	head->direction = direction;
-}
-void moveSnake(SnakeTile* head, TileType** grid, bool* gameOver){
-	Coord previousPos = {head->pos.x, head->pos.y};
-	switch (head->direction){
-		case RIGHT:
-			head->pos.x += 1;
-			break;
-		case DOWN:
-			head->pos.y += 1;
-			break;
-		case LEFT:
-			head->pos.x -= 1;
-			break;
-		case UP:
-			head->pos.y -= 1;
-			break;
-		default:
-			break;
-	}
-
-	if(grid[head->pos.x][head->pos.y] == SNAKE ||(head->pos.y >= GRID_HEIGHT || head->pos.y < 0) || (head->pos.x >= GRID_HEIGHT || head->pos.x < 0)){
-		head->pos.x = previousPos.x;
-		head->pos.y = previousPos.y;
-		*gameOver = 1;
-		return;
-	}
-
-	//Tile has food
-	if(grid[head->pos.x][head->pos.y] == FOOD){
-		createSnakeTile(head, grid);
-	}
-
-	grid[head->pos.x][head->pos.y] = SNAKE;
-
-	grid[previousPos.x][previousPos.y] = EMPTY;
-	if(head->next != NULL) moveSnake(head->next, grid, gameOver);
-}
-
-
-void deallocSnake(SnakeTile *head){
-	if(head->next != NULL){
-		deallocSnake(head->next);
-	}
-	free(head);
-}
 
 TileType** initGrid(u8 width, u8 height){
 	TileType** grid = (TileType**) malloc(sizeof(TileType*) * width);
