@@ -7,9 +7,11 @@ Grid* initGrid(u8 width, u8 height){
 	g->height = height;
 	g->width = width;
 	
+    //Creates an empty grid
 	TileType** field = (TileType**) malloc(sizeof(TileType*) * height);
 	for(u8 i = 0; i < height; i++){
 		field[i] = (TileType*) malloc(sizeof(TileType) * width);
+        for(int j = 0; j < width; j++) field[i][j] = EMPTY;
 	}
 
 	g->playfield = field;

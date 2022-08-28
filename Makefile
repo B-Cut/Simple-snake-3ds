@@ -38,6 +38,8 @@ DATA		:=	data
 INCLUDES	:=	include
 GRAPHICS	:=	gfx
 GFXBUILD	:=	$(BUILD)
+APP_TITLE   :=  Simple Snake 3DS Clone
+APP_AUTHOR	:=	B-Cut
 #ROMFS		:=	romfs
 #GFXBUILD	:=	$(ROMFS)/gfx
 

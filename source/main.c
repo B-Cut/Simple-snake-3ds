@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
 	//define the number of tiles of the grid
 	
 	Grid* g = initGrid(GRID_WIDTH, GRID_HEIGHT);
-	SnakeTile* head = createHead(GRID_WIDTH/2, GRID_HEIGHT/2, g);
+	SnakeTile* head = createHead(g);
 
 	Directions currentMoveDirection = RIGHT;
 
@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
 	}
 
 	//Dealloc elements
-	deallocGrid(grid, GRID_WIDTH, GRID_HEIGHT);
+	deallocGrid(g);
 	deallocSnake(head);
 
 	// Deinit libs

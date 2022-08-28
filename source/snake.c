@@ -1,11 +1,12 @@
 #include "grid.h"
 #include <stdlib.h>
 
-void createSnakeTile(SnakeTile* head, TileType** grid){
+void createSnakeTile(SnakeTile* head, Grid* g){
 	if(head->next != NULL){
-		createSnakeTile(head->next, grid);//Creates the new tile as the last item
+		createSnakeTile(head->next, g);//Creates the new tile as the last item
 		return;
 	}
+
 	SnakeTile* tile = (SnakeTile*) malloc(sizeof(SnakeTile));
 	tile->direction = head->direction;
 	tile->next = NULL;
@@ -29,11 +30,13 @@ void createSnakeTile(SnakeTile* head, TileType** grid){
 	}
 	
 	head->next = tile;
-	grid[tile->pos.x][tile->pos.y] = SNAKE;
+	g->playfield[tile->pos.x][tile->pos.y] = SNAKE;
 }
 
-SnakeTile* createHead(u8 initialX, u8 initialY, TileType** grid){
+SnakeTile* createHead(Grid* g){
 	SnakeTile *head = (SnakeTile*) malloc(sizeof(SnakeTile));
+	u8 initialX = g->width/2;
+	u8 initialY = g->height/2;
 
 	head->direction = RIGHT;
 	head->next = NULL;
@@ -41,18 +44,18 @@ SnakeTile* createHead(u8 initialX, u8 initialY, TileType** grid){
 	head->pos.x = initialX;
 	head->pos.y = initialY;
 
-	grid[head->pos.x][head->pos.y] = SNAKE;
+	g->playfield[head->pos.x][head->pos.y] = SNAKE;
 
 	return head;
 }
 
 void updateSnakeMoveDir(SnakeTile* head, Directions direction){
 	if(head->next != NULL){
-		updateSnakeMoveDir(head->next, head->direction);//The next tile moves as the previous tile
+		updateSnakeMoveDir(head->next, head->direction);//The next tile moves in the same direction of the previous tile
 	}
 	head->direction = direction;
 }
-void moveSnake(SnakeTile* head, TileType** grid, bool* gameOver){
+void moveSnake(SnakeTile* head, Grid* g, bool* gameOver){
 	Coord previousPos = {head->pos.x, head->pos.y};
 	switch (head->direction){
 		case RIGHT:
@@ -71,22 +74,24 @@ void moveSnake(SnakeTile* head, TileType** grid, bool* gameOver){
 			break;
 	}
 
-	if(grid[head->pos.x][head->pos.y] == SNAKE ||(head->pos.y >= GRID_HEIGHT || head->pos.y < 0) || (head->pos.x >= GRID_HEIGHT || head->pos.x < 0)){
-		head->pos.x = previousPos.x;
-		head->pos.y = previousPos.y;
-		*gameOver = 1;
-		return;
+	if(g->playfield[head->pos.x][head->pos.y] == SNAKE ||
+		(head->pos.y >= g->height || head->pos.y < 0) ||
+		(head->pos.x >= g->width || head->pos.x < 0)){
+			head->pos.x = previousPos.x;
+			head->pos.y = previousPos.y;
+			*gameOver = 1;
+			return;
 	}
 
 	//Tile has food
-	if(grid[head->pos.x][head->pos.y] == FOOD){
-		createSnakeTile(head, grid);
+	if(g->playfield[head->pos.x][head->pos.y] == FOOD){
+		createSnakeTile(head, g);
 	}
 
-	grid[head->pos.x][head->pos.y] = SNAKE;
+	g->playfield[head->pos.x][head->pos.y] = SNAKE;
 
-	grid[previousPos.x][previousPos.y] = EMPTY;
-	if(head->next != NULL) moveSnake(head->next, grid, gameOver);
+	g->playfield[previousPos.x][previousPos.y] = EMPTY;
+	if(head->next != NULL) moveSnake(head->next, g, gameOver);
 }
 
 

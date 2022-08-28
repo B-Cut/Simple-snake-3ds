@@ -5,10 +5,10 @@
 
 
 
-SnakeTile* createHead(u8 initialX, u8 initialY, TileType** grid);
-void createSnakeTile(SnakeTile* head, TileType** grid);
+SnakeTile* createHead(Grid* g);
+void createSnakeTile(SnakeTile* head, Grid* g);
 void updateSnakeMoveDir(SnakeTile* head, Directions direction);
-void moveSnake(SnakeTile* head, TileType** grid, bool* gameOver);
+void moveSnake(SnakeTile* head, Grid* g, bool* gameOver);
 void deallocSnake(SnakeTile* head);
 
 #endif
