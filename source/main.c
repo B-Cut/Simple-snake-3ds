@@ -1,4 +1,3 @@
-//TODO: Separate different functions in different files
 //TODO: Implement a states system
 
 #include <citro2d.h>
@@ -9,12 +8,12 @@
 #include <stdlib.h>
 
 #include "snake.h"
-#include "util.h"
+#include "grid.h"
+
 
 
 //Playfield code
-TileType** initGrid(u8 width, u8 height);
-void deallocGrid(TileType** grid, u8 width, u8 height);
+
 
 //Food code
 void spawnFood(TileType** grid);
@@ -44,8 +43,8 @@ int main(int argc, char* argv[]) {
 
 	//define the number of tiles of the grid
 	
-	TileType** grid = initGrid(GRID_WIDTH, GRID_HEIGHT);
-	SnakeTile* head = createHead(GRID_WIDTH/2, GRID_HEIGHT/2, grid);
+	Grid* g = initGrid(GRID_WIDTH, GRID_HEIGHT);
+	SnakeTile* head = createHead(GRID_WIDTH/2, GRID_HEIGHT/2, g);
 
 	Directions currentMoveDirection = RIGHT;
 
@@ -74,7 +73,7 @@ int main(int argc, char* argv[]) {
 		else if(kDown & KEY_DUP) currentMoveDirection = UP;
 
 		updateSnakeMoveDir(head, currentMoveDirection);
-		moveSnake(head, grid, &gameOver);
+		moveSnake(head, g, &gameOver);
 		
 		
 
@@ -85,7 +84,7 @@ int main(int argc, char* argv[]) {
 
 		for(u8 i = 0; i < GRID_WIDTH; i++){
 			for(u8 j = 0; j < GRID_HEIGHT; j++){
-				switch (grid[i][j])
+				switch (g->playfield[i][j])
 				{
 				case EMPTY:
 					C2D_DrawRectSolid(i*TILE_WIDTH, j*TILE_HEIGHT, 0, TILE_WIDTH, TILE_HEIGHT, clrBackground);
@@ -119,20 +118,6 @@ int main(int argc, char* argv[]) {
 	return 0;
 }
 
-
-TileType** initGrid(u8 width, u8 height){
-	TileType** grid = (TileType**) malloc(sizeof(TileType*) * width);
-	for(u8 i = 0; i < width; i++){
-		grid[i] = (TileType*) malloc(sizeof(TileType) * width);
-	}
-	return grid;
-}
-void deallocGrid(TileType** grid, u8 width, u8 height){
-	for(u8 i = 0; i < width; i++){
-		free(grid[i]);
-	}
-	free(grid);
-}
 
 void spawnFood(TileType** grid){
 	srand(osGetTime());

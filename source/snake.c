@@ -1,4 +1,4 @@
-#include "util.h"
+#include "grid.h"
 #include <stdlib.h>
 
 void createSnakeTile(SnakeTile* head, TileType** grid){

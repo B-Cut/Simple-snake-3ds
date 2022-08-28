@@ -1,7 +1,7 @@
 #ifndef SNAKE_H
 #define SNAKE_H
 
-#include "util.h"
+#include "grid.h"
 
 
 
