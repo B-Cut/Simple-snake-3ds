@@ -12,14 +12,6 @@
 #define GRID_HEIGHT 24
 
 typedef enum directions{RIGHT, DOWN, LEFT, UP} Directions;
-typedef enum tiletype{EMPTY, SNAKE, FOOD} TileType;
-
-typedef struct grid{
-	u8 width;
-	u8 height;
-
-	TileType** playfield;
-} Grid;
 
 typedef struct coord{
 	u8 x;
@@ -31,9 +23,6 @@ typedef struct snake_tile{
 	Directions direction;
 	struct snake_tile *next;
 } SnakeTile;
-
-Grid* initGrid(u8 width, u8 height);
-void deallocGrid(Grid* g);
 
 
 #endif

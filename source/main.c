@@ -16,7 +16,7 @@
 
 
 //Food code
-void spawnFood(TileType** grid);
+void spawnFood(SnakeTile* head, Coord* food);
 
 void doNothing(){}
 
@@ -43,8 +43,9 @@ int main(int argc, char* argv[]) {
 
 	//define the number of tiles of the grid
 	
-	Grid* g = initGrid(GRID_WIDTH, GRID_HEIGHT);
-	SnakeTile* head = createHead(g);
+	SnakeTile* head = createHead();
+	Coord food = {0, 0};
+	spawnFood(head, &food); 
 
 	Directions currentMoveDirection = RIGHT;
 
@@ -53,6 +54,7 @@ int main(int argc, char* argv[]) {
 	// Main loop
 	while (aptMainLoop())
 	{
+		if(gameOver) continue; //Freezes the game on game over
 		hidScanInput();
 
 		// Respond to user input
@@ -73,8 +75,18 @@ int main(int argc, char* argv[]) {
 		else if(kDown & KEY_DUP) currentMoveDirection = UP;
 
 		updateSnakeMoveDir(head, currentMoveDirection);
-		moveSnake(head, g, &gameOver);
-		
+		moveSnake(head, &gameOver);
+		switch (checkCollision(head, &food)){
+			case 1:
+				gameOver = true;
+				break;
+			case 2:
+				createSnakeTile(head);
+				spawnFood(head, &food);
+				break;
+			default:
+				break;
+		}
 		
 
 		// Render the scene
@@ -82,24 +94,16 @@ int main(int argc, char* argv[]) {
 		C2D_TargetClear(top, clrClear);
 		C2D_SceneBegin(top);
 
-		for(u8 i = 0; i < GRID_WIDTH; i++){
-			for(u8 j = 0; j < GRID_HEIGHT; j++){
-				switch (g->playfield[i][j])
-				{
-				case EMPTY:
-					C2D_DrawRectSolid(i*TILE_WIDTH, j*TILE_HEIGHT, 0, TILE_WIDTH, TILE_HEIGHT, clrBackground);
-					break;
-				case FOOD:
-					C2D_DrawRectSolid(i*TILE_WIDTH, j*TILE_HEIGHT, 0, TILE_WIDTH, TILE_HEIGHT, clrFood);
-					break;
-				case SNAKE:
-					C2D_DrawRectSolid(i*TILE_WIDTH, j*TILE_HEIGHT, 0, TILE_WIDTH, TILE_HEIGHT, clrSnake);
-					break;
-				default:
-					break;
-				}
-			}
+		//Draw Food position
+		C2D_DrawRectSolid(food.x * TILE_WIDTH, food.y * TILE_HEIGHT, 0, TILE_WIDTH, TILE_HEIGHT, clrFood);
+
+		//There's no actual need for a grid to keep track of the snake position, we can just go down the linked list
+		for(SnakeTile* tile = head; tile != NULL; tile = tile->next){
+			C2D_DrawRectSolid(tile->pos.x * TILE_WIDTH, tile->pos.y * TILE_HEIGHT, 0, TILE_WIDTH, TILE_HEIGHT, clrSnake);
 		}
+
+		
+
 		//TODO: look for a better way to control the game speed
 		svcSleepThread(100000000);
 		C2D_Flush();
@@ -108,7 +112,6 @@ int main(int argc, char* argv[]) {
 	}
 
 	//Dealloc elements
-	deallocGrid(g);
 	deallocSnake(head);
 
 	// Deinit libs
@@ -119,15 +122,14 @@ int main(int argc, char* argv[]) {
 }
 
 
-void spawnFood(TileType** grid){
+void spawnFood(SnakeTile* head, Coord* food){
 	srand(osGetTime());
-	u8 posX = rand() % GRID_WIDTH;
-	u8 posY = rand() % GRID_HEIGHT;
+	food->x = rand() % GRID_WIDTH;
+	food->y = rand() % GRID_HEIGHT;
 
-	if(grid[posX][posY] == EMPTY){
-		grid[posX][posY] = FOOD;
-		return;
+	for(SnakeTile* tile = head; tile != NULL; tile = tile->next){
+		if(tile->pos.x == food->x && tile->pos.y == food->y){
+			return spawnFood(head, food); //repeats the function to generate new position
+		}
 	}
-	else spawnFood(grid);
-	
 }

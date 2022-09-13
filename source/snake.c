@@ -1,9 +1,9 @@
 #include "grid.h"
 #include <stdlib.h>
 
-void createSnakeTile(SnakeTile* head, Grid* g){
+void createSnakeTile(SnakeTile* head){
 	if(head->next != NULL){
-		createSnakeTile(head->next, g);//Creates the new tile as the last item
+		createSnakeTile(head->next);//Creates the new tile as the last item
 		return;
 	}
 
@@ -30,21 +30,16 @@ void createSnakeTile(SnakeTile* head, Grid* g){
 	}
 	
 	head->next = tile;
-	g->playfield[tile->pos.x][tile->pos.y] = SNAKE;
 }
 
-SnakeTile* createHead(Grid* g){
+SnakeTile* createHead(){
 	SnakeTile *head = (SnakeTile*) malloc(sizeof(SnakeTile));
-	u8 initialX = g->width/2;
-	u8 initialY = g->height/2;
 
 	head->direction = RIGHT;
 	head->next = NULL;
 	
-	head->pos.x = initialX;
-	head->pos.y = initialY;
-
-	g->playfield[head->pos.x][head->pos.y] = SNAKE;
+	head->pos.x = GRID_WIDTH/2;
+	head->pos.y = GRID_HEIGHT/2;
 
 	return head;
 }
@@ -55,8 +50,7 @@ void updateSnakeMoveDir(SnakeTile* head, Directions direction){
 	}
 	head->direction = direction;
 }
-void moveSnake(SnakeTile* head, Grid* g, bool* gameOver){
-	Coord previousPos = {head->pos.x, head->pos.y};
+void moveSnake(SnakeTile* head, bool* gameOver){
 	switch (head->direction){
 		case RIGHT:
 			head->pos.x += 1;
@@ -73,25 +67,7 @@ void moveSnake(SnakeTile* head, Grid* g, bool* gameOver){
 		default:
 			break;
 	}
-
-	if(g->playfield[head->pos.x][head->pos.y] == SNAKE ||
-		(head->pos.y >= g->height || head->pos.y < 0) ||
-		(head->pos.x >= g->width || head->pos.x < 0)){
-			head->pos.x = previousPos.x;
-			head->pos.y = previousPos.y;
-			*gameOver = 1;
-			return;
-	}
-
-	//Tile has food
-	if(g->playfield[head->pos.x][head->pos.y] == FOOD){
-		createSnakeTile(head, g);
-	}
-
-	g->playfield[head->pos.x][head->pos.y] = SNAKE;
-
-	g->playfield[previousPos.x][previousPos.y] = EMPTY;
-	if(head->next != NULL) moveSnake(head->next, g, gameOver);
+	if(head->next != NULL) moveSnake(head->next, gameOver);
 }
 
 
@@ -100,4 +76,22 @@ void deallocSnake(SnakeTile *head){
 		deallocSnake(head->next);
 	}
 	free(head);
+}
+
+u8 checkCollision(SnakeTile* head, Coord* food){
+	//Returns 1 if snake collides with itself or the walls, 2 if it collides with food and 0 if it doesn't collide
+
+	if(head->pos.x >= GRID_WIDTH || head->pos.x < 0) return 1;
+	if(head->pos.y >= GRID_HEIGHT || head->pos.y < 0) return 1;
+
+	for(SnakeTile* tile = head->next; tile != NULL; tile = tile->next){
+		if (tile->pos.x == head->pos.x && tile->pos.y == head->pos.y){
+			//checks if head overlaps with other part of the body
+			return 1;
+		}	
+	}
+
+	if(head->pos.x == food->x && head->pos.y == food->y) return 2;
+
+	return 0;
 }

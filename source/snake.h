@@ -2,13 +2,14 @@
 #define SNAKE_H
 
 #include "grid.h"
+#include <3ds.h>
 
 
-
-SnakeTile* createHead(Grid* g);
-void createSnakeTile(SnakeTile* head, Grid* g);
+SnakeTile* createHead();
+void createSnakeTile(SnakeTile* head);
 void updateSnakeMoveDir(SnakeTile* head, Directions direction);
-void moveSnake(SnakeTile* head, Grid* g, bool* gameOver);
+void moveSnake(SnakeTile* head, bool* gameOver);
+u8 checkCollision(SnakeTile* head, Coord* food);
 void deallocSnake(SnakeTile* head);
 
 #endif
