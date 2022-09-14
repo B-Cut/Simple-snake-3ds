@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 #include "snake.h"
-#include "grid.h"
+#include "util.h"
 
 
 
