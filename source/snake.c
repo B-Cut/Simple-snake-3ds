@@ -44,14 +44,18 @@ SnakeTile* createHead(){
 	return head;
 }
 
-void updateSnakeMoveDir(SnakeTile* head, Directions direction){
+/*void updateSnakeMoveDir(SnakeTile* head, Directions direction){
 	if(head->next != NULL){
 		updateSnakeMoveDir(head->next, head->direction);//The next tile moves in the same direction of the previous tile
 	}
+
 	head->direction = direction;
-}
-void moveSnake(SnakeTile* head, bool* gameOver){
-	switch (head->direction){
+	
+}*/
+
+void moveSnake(SnakeTile* head, bool* gameOver, Directions direction){
+	Coord previousPos = head->pos;
+	switch (direction){
 		case RIGHT:
 			head->pos.x += 1;
 			break;
@@ -67,7 +71,11 @@ void moveSnake(SnakeTile* head, bool* gameOver){
 		default:
 			break;
 	}
-	if(head->next != NULL) moveSnake(head->next, gameOver);
+	for(SnakeTile* tile = head->next; tile != NULL; tile = tile->next){
+		Coord temp = tile->pos;
+		tile->pos = previousPos;
+		previousPos = temp;
+	}
 }
 
 

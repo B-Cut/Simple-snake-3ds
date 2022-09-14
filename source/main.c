@@ -69,13 +69,13 @@ int main(int argc, char* argv[]) {
 
 		
 		
-		if(kDown & KEY_DRIGHT) currentMoveDirection = RIGHT;
-		else if(kDown & KEY_DDOWN) currentMoveDirection = DOWN;
-		else if(kDown & KEY_DLEFT) currentMoveDirection = LEFT;
-		else if(kDown & KEY_DUP) currentMoveDirection = UP;
+		if(kDown & KEY_DRIGHT && currentMoveDirection != LEFT) currentMoveDirection = RIGHT;
+		else if(kDown & KEY_DDOWN && currentMoveDirection != UP) currentMoveDirection = DOWN;
+		else if(kDown & KEY_DLEFT && currentMoveDirection != RIGHT) currentMoveDirection = LEFT;
+		else if(kDown & KEY_DUP && currentMoveDirection != DOWN) currentMoveDirection = UP;
 
-		updateSnakeMoveDir(head, currentMoveDirection);
-		moveSnake(head, &gameOver);
+		//updateSnakeMoveDir(head, currentMoveDirection);
+		moveSnake(head, &gameOver, currentMoveDirection);
 		switch (checkCollision(head, &food)){
 			case 1:
 				gameOver = true;
