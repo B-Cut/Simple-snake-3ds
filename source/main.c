@@ -44,6 +44,7 @@ int main(int argc, char* argv[]) {
 	//define the number of tiles of the grid
 	
 	SnakeTile* head = createHead();
+	SnakeTile* tail = head;//We start with a single pixel;
 	Coord food = {0, 0};
 	spawnFood(head, &food); 
 
@@ -55,17 +56,21 @@ int main(int argc, char* argv[]) {
 	while (aptMainLoop())
 	{
 		if(gameOver) continue; //Freezes the game on game over
+		
+		
 		hidScanInput();
+		//TODO: look for a better way to control the game speed
+		svcSleepThread(100000000);
 
 		// Respond to user input
 		u32 kDown = hidKeysDown();
 		if (kDown & KEY_START)
 			break; // break in order to return to hbmenu
 		printf("\x1b[1;1HCitro2D snake by BCut");
-		printf("\x1b[1;1HUse the D-Pad to play");
-		printf("\x1b[2;1HCPU:     %6.2f%%\x1b[K", C3D_GetProcessingTime()*6.0f);
-		printf("\x1b[3;1HGPU:     %6.2f%%\x1b[K", C3D_GetDrawingTime()*6.0f);
-		printf("\x1b[4;1HCmdBuf:  %6.2f%%\x1b[K", C3D_GetCmdBufUsage()*100.0f);
+		printf("\x1b[2;1HUse the D-Pad to play");
+		printf("\x1b[3;1HCPU:     %6.2f%%\x1b[K", C3D_GetProcessingTime()*6.0f);
+		printf("\x1b[4;1HGPU:     %6.2f%%\x1b[K", C3D_GetDrawingTime()*6.0f);
+		printf("\x1b[5;1HCmdBuf:  %6.2f%%\x1b[K", C3D_GetCmdBufUsage()*100.0f);
 
 		
 		
@@ -81,7 +86,7 @@ int main(int argc, char* argv[]) {
 				gameOver = true;
 				break;
 			case 2:
-				createSnakeTile(head);
+				tail = createSnakeTile(tail);
 				spawnFood(head, &food);
 				break;
 			default:
@@ -102,13 +107,8 @@ int main(int argc, char* argv[]) {
 			C2D_DrawRectSolid(tile->pos.x * TILE_WIDTH, tile->pos.y * TILE_HEIGHT, 0, TILE_WIDTH, TILE_HEIGHT, clrSnake);
 		}
 
-		
-
-		//TODO: look for a better way to control the game speed
-		svcSleepThread(100000000);
 		C2D_Flush();
-		C3D_FrameEnd(0);
-		
+		C3D_FrameEnd(0);		
 	}
 
 	//Dealloc elements

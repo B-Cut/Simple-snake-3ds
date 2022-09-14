@@ -1,35 +1,31 @@
 #include "util.h"
 #include <stdlib.h>
 
-void createSnakeTile(SnakeTile* head){
-	if(head->next != NULL){
-		createSnakeTile(head->next);//Creates the new tile as the last item
-		return;
-	}
-
+SnakeTile* createSnakeTile(SnakeTile* tail){
 	SnakeTile* tile = (SnakeTile*) malloc(sizeof(SnakeTile));
-	tile->direction = head->direction;
+	tile->direction = tail->direction;
 	tile->next = NULL;
 	//The tile should be positioned "opposite" to the direction of previous tile
-	switch (head->direction){
+	switch (tail->direction){
 	case UP:
-		tile->pos.x = head->pos.x;
-		tile->pos.y = head->pos.y + 1;
+		tile->pos.x = tail->pos.x;
+		tile->pos.y = tail->pos.y + 1;
 		break;
 	case RIGHT:
-		tile->pos.x = head->pos.x - 1;
-		tile->pos.y = head->pos.y;
+		tile->pos.x = tail->pos.x - 1;
+		tile->pos.y = tail->pos.y;
 	case DOWN:
-		tile->pos.x = head->pos.x;
-		tile->pos.y = head->pos.y -1;
+		tile->pos.x = tail->pos.x;
+		tile->pos.y = tail->pos.y -1;
 	case LEFT:
-		tile->pos.x = head->pos.x + 1;
-		tile->pos.y = head->pos.y;
+		tile->pos.x = tail->pos.x + 1;
+		tile->pos.y = tail->pos.y;
 	default:
 		break;
 	}
 	
-	head->next = tile;
+	tail->next = tile;
+	return tile;
 }
 
 SnakeTile* createHead(){
@@ -55,6 +51,7 @@ SnakeTile* createHead(){
 
 void moveSnake(SnakeTile* head, bool* gameOver, Directions direction){
 	Coord previousPos = head->pos;
+	Directions previousDirection = head->direction;
 	switch (direction){
 		case RIGHT:
 			head->pos.x += 1;
@@ -71,10 +68,16 @@ void moveSnake(SnakeTile* head, bool* gameOver, Directions direction){
 		default:
 			break;
 	}
+	head->direction = direction;
+
 	for(SnakeTile* tile = head->next; tile != NULL; tile = tile->next){
-		Coord temp = tile->pos;
+		Coord tempPos = tile->pos;
 		tile->pos = previousPos;
-		previousPos = temp;
+		previousPos = tempPos;
+
+		Directions tempDir = tile->direction;
+		tile->direction = previousDirection;
+		previousDirection = tempDir;
 	}
 }
 

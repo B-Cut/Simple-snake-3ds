@@ -6,7 +6,7 @@
 
 
 SnakeTile* createHead();
-void createSnakeTile(SnakeTile* head);
+SnakeTile* createSnakeTile(SnakeTile* tail);
 //void updateSnakeMoveDir(SnakeTile* head, Directions direction);
 void moveSnake(SnakeTile* head, bool* gameOver, Directions direction);
 u8 checkCollision(SnakeTile* head, Coord* food);
